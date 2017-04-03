@@ -4,12 +4,12 @@ def build(bld):
     module = bld.create_ns3_module('aomdv', ['internet', 'wifi'])
     module.includes = '.'
     module.source = [
-        #'model/aomdv-id-cache.cc',
-        #'model/aomdv-dpd.cc',
+        'model/aomdv-id-cache.cc',
+        'model/aomdv-dpd.cc',
         'model/aomdv-rtable.cc',
-        #'model/aomdv-rqueue.cc',
+        'model/aomdv-rqueue.cc',
         'model/aomdv-packet.cc',
-        #'model/aomdv-neighbor.cc',
+        'model/aomdv-neighbor.cc',
         #'model/aomdv-routing-protocol.cc',
         #'helper/aomdv-helper.cc', 
         ]
@@ -26,12 +26,12 @@ def build(bld):
     headers = bld(features='ns3header')
     headers.module = 'aomdv'
     headers.source = [
-        #'model/aomdv-id-cache.h',
-        #'model/aomdv-dpd.h',
+        'model/aomdv-id-cache.h',
+        'model/aomdv-dpd.h',
         'model/aomdv-rtable.h',
-        #'model/aomdv-rqueue.h',
+        'model/aomdv-rqueue.h',
         'model/aomdv-packet.h',
-        #'model/aomdv-neighbor.h',
+        'model/aomdv-neighbor.h',
         #'model/aomdv-routing-protocol.h',
         #'helper/aomdv-helper.h',
         ]
