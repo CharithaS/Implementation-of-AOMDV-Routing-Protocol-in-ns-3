@@ -10,7 +10,7 @@ def build(bld):
         'model/aomdv-rqueue.cc',
         'model/aomdv-packet.cc',
         'model/aomdv-neighbor.cc',
-        #'model/aomdv-routing-protocol.cc',
+        'model/aomdv-routing-protocol.cc',
         #'helper/aomdv-helper.cc', 
         ]
 
@@ -32,7 +32,7 @@ def build(bld):
         'model/aomdv-rqueue.h',
         'model/aomdv-packet.h',
         'model/aomdv-neighbor.h',
-        #'model/aomdv-routing-protocol.h',
+        'model/aomdv-routing-protocol.h',
         #'helper/aomdv-helper.h',
         ]
 

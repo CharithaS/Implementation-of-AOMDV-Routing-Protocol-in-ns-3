@@ -45,6 +45,31 @@ IdCache::IsDuplicate (Ipv4Address addr, uint32_t id)
   m_idCache.push_back (uniqueId);
   return false;
 }
+
+struct IdCache::UniqueId*
+IdCache::GetId (Ipv4Address addr, uint32_t id)
+{
+  Purge ();
+  for (std::vector<UniqueId>::iterator i = m_idCache.begin ();
+       i != m_idCache.end (); ++i)
+    {
+      if (i->m_context == addr && i->m_id == id)
+        {
+          UniqueId *uid=&(*i);
+          return uid;
+        }
+    }
+  return NULL;
+}
+
+void
+IdCache::InsertId (Ipv4Address addr, uint32_t id)
+{
+  struct UniqueId uniqueId =
+  { addr, id, m_lifetime + Simulator::Now (), 0 };
+  m_idCache.push_back (uniqueId);
+}
+
 void
 IdCache::Purge ()
 {

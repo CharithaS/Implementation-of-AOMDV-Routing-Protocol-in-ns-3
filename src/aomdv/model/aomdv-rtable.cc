@@ -74,7 +74,8 @@ RoutingTableEntry::RoutingTableEntry (Ipv4Address dst, bool vSeqNo, uint32_t seq
   m_validSeqNo (vSeqNo), m_seqNo (seqNo), 
   m_lifeTime (lifetime + Simulator::Now ()), m_flag (VALID), m_reqCount (0), 
   m_blackListState (false), m_blackListTimeout (Simulator::Now ()),
-  m_advertisedHopCount (INFINITY2), m_highestSeqnoHeard (0), 
+  m_advertisedHopCount (INFINITY2), m_highestSeqnoHeard (0),
+  m_lastHopCount (INFINITY2), 
   m_numPaths (0), m_error (false)
 {
 }
@@ -236,25 +237,13 @@ RoutingTableEntry::PathDeleteLongest (void)
 }
 
 bool 
-RoutingTableEntry::PathEmpty (void)
+RoutingTableEntry::PathEmpty (void) const
 {
-  Path *path = NULL;
-  std::vector<Path>::iterator i = m_pathList.begin ();
-  path = &(*i);
-  if (path) 
-    {
-      //assert(rt_num_paths > 0);
-      return false;
-    }
-  else 
-    {
-      //assert(rt_num_paths == 0);
-      return true;
-    }
+  return m_pathList.empty ();
 }
 
-struct RoutingTableEntry::Path* 
-RoutingTableEntry::PathFind (void)
+struct RoutingTableEntry::Path * 
+RoutingTableEntry::PathFind (void) 
 {
   Path *path = NULL;
   std::vector<Path>::iterator i = m_pathList.begin ();
@@ -428,6 +417,27 @@ RoutingTableEntry::GetPrecursors (std::vector<Ipv4Address> & prec) const
         }
       if (result)
         prec.push_back (*i);
+    }
+}
+
+void
+RoutingTableEntry::GetPaths (std::vector<Path> & paths) const
+{
+  NS_LOG_FUNCTION (this);
+  if (PathEmpty ())
+    return;
+  for (std::vector<Path>::const_iterator i = m_pathList.begin (); i
+       != m_pathList.end (); ++i)
+    {
+      bool result = true;
+      for (std::vector<Path>::const_iterator j = paths.begin (); j
+           != paths.end (); ++j)
+        {
+          if (*j == *i)
+            result = false;
+        }
+      if (result)
+        paths.push_back (*i);
     }
 }
 
@@ -714,7 +724,7 @@ RoutingTable::HasActiveRoutes ()
     return false;
 }
 
-/*bool
+bool
 RoutingTable::MarkLinkAsUnidirectional (Ipv4Address neighbor, Time blacklistTimeout)
 {
   NS_LOG_FUNCTION (this << neighbor << blacklistTimeout.GetSeconds ());
@@ -726,11 +736,11 @@ RoutingTable::MarkLinkAsUnidirectional (Ipv4Address neighbor, Time blacklistTime
       return false;
     }
   i->second.SetUnidirectional (true);
-  i->second.SetBalcklistTimeout (blacklistTimeout);
+  i->second.SetBlacklistTimeout (blacklistTimeout);
   i->second.SetRreqCnt (0);
   NS_LOG_LOGIC ("Set link to " << neighbor << " to unidirectional");
   return true;
-}*/
+}
 
 void
 RoutingTable::Print (Ptr<OutputStreamWrapper> stream) const

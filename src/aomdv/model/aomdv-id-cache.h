@@ -64,17 +64,6 @@ class IdCache
 public:
   /// c-tor
   IdCache (Time lifetime) : m_lifetime (lifetime) {}
-  /// Check that entry (addr, id) exists in cache. Add entry, if it doesn't exist.
-  bool IsDuplicate (Ipv4Address addr, uint32_t id);
-  /// Remove all expired entries
-  void Purge ();
-  /// Return number of entries in cache
-  uint32_t GetSize ();
-  /// Set lifetime for future added entries.
-  void SetLifetime (Time lifetime) { m_lifetime = lifetime; }
-  /// Return lifetime for existing entries in cache
-  Time GetLifeTime () const { return m_lifetime; }
-private:
   /// Unique packet ID
   struct UniqueId
   {
@@ -92,6 +81,22 @@ private:
     void ForwardPathInsert (Ipv4Address nextHop, Ipv4Address lastHop = 0);
     bool ForwardPathLookup (Ipv4Address nextHop, AOMDVRoute & rt, Ipv4Address lastHop = 0);
   };
+
+  void InsertId (Ipv4Address addr, uint32_t id);
+  struct UniqueId* GetId (Ipv4Address addr, uint32_t id);
+  /// Check that entry (addr, id) exists in cache. Add entry, if it doesn't exist.
+  bool IsDuplicate (Ipv4Address addr, uint32_t id);
+  /// Remove all expired entries
+  void Purge ();
+  /// Return number of entries in cache
+  uint32_t GetSize ();
+  /// Set lifetime for future added entries.
+  void SetLifetime (Time lifetime) { m_lifetime = lifetime; }
+  /// Return lifetime for existing entries in cache
+  Time GetLifeTime () const { return m_lifetime; }
+
+private:
+  
   struct IsExpired
   {
     bool operator() (const struct UniqueId & u) const

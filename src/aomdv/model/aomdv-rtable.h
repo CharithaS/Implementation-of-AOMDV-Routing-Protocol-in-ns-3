@@ -86,23 +86,31 @@ public:
     Ipv4Address m_lastHop;    // lasthop address
     /// Output interface address
     Ipv4InterfaceAddress m_iface;
-     Time m_ts;         // time when we saw this nexthop
+    Time m_ts;         // time when we saw this nexthop
     // CHANGE
     bool m_pathError;
 
     Path (Ptr<NetDevice> dev, Ipv4Address dst, Ipv4Address nextHop, uint16_t hopCount, Time expireTime, 
           Ipv4Address lastHop, Ipv4InterfaceAddress iface);
 
+    Ptr<Ipv4Route> GetRoute () const { return m_ipv4Route; }
+    void SetRoute (Ptr<Ipv4Route> r) { m_ipv4Route = r; }
     void SetNextHop (Ipv4Address nextHop) { m_ipv4Route->SetGateway (nextHop); }
     Ipv4Address GetNextHop () const { return m_ipv4Route->GetGateway (); }
+    void SetLastHop (Ipv4Address lastHop) { m_lastHop = lastHop; }
+    Ipv4Address GetLastHop () const { return m_lastHop; }
     void SetOutputDevice (Ptr<NetDevice> dev) { m_ipv4Route->SetOutputDevice (dev); }
     Ptr<NetDevice> GetOutputDevice () const { return m_ipv4Route->GetOutputDevice (); }
     void SetHopCount (uint16_t hop) { m_hopCount = hop; }
     uint16_t GetHopCount () const { return m_hopCount; }
     Ipv4InterfaceAddress GetInterface () const { return m_iface; }
     void SetInterface (Ipv4InterfaceAddress iface) { m_iface = iface; }
+    void SetExpire (Time et) { m_expire = et + Simulator::Now (); }
+    Time GetExpire () const { return m_expire - Simulator::Now (); }
   
     void Print (Ptr<OutputStreamWrapper> stream) const;
+
+    friend bool operator == (Path const &a, Path const &b);
   };
 
   /// Path functions - contribution
@@ -115,15 +123,15 @@ public:
   struct Path* PathLookupLastHop (Ipv4Address id);
   void PathDelete (Ipv4Address id);
   void DeletePathFromInterface (Ipv4InterfaceAddress iface);
-  void PathAllDelete(void);                  // delete all paths
-  void PathDeleteLongest(void);          // delete longest path
-  bool PathEmpty(void);                   // is the path list empty?
-  struct Path* PathFind(void);                    // find the path that we got first
-  struct Path* PathFindMinHop(void);              // find the shortest path
-  uint16_t PathGetMaxHopCount(void);  
-  uint16_t PathGetMinHopCount(void);  
-  Time PathGetMaxExpirationTime(void); 
-  void PathPurge(void);
+  void PathAllDelete (void);                  // delete all paths
+  void PathDeleteLongest (void);          // delete longest path
+  bool PathEmpty (void) const;                   // is the path list empty?
+  struct Path * PathFind (void);            // find the path that we got first
+  struct Path* PathFindMinHop (void);            // find the shortest path
+  uint16_t PathGetMaxHopCount (void);  
+  uint16_t PathGetMinHopCount (void);  
+  Time PathGetMaxExpirationTime (void); 
+  void PathPurge (void);
 
 
 
@@ -162,6 +170,9 @@ public:
 
   /// Mark entry as "down" (i.e. disable it)
   void Invalidate (Time badLinkLifetime);
+
+  //AOMDV Code
+  void GetPaths (std::vector<Path> & paths) const; 
   ///\name Fields
   //\{
   Ipv4Address GetDestination () const { return m_dst; }
@@ -184,6 +195,8 @@ public:
   uint32_t GetAdvertisedHopCount () const { return m_advertisedHopCount; }
   void SetHighestSequenceNumberHeard (uint32_t hsh ) { m_highestSeqnoHeard = hsh; }
   uint32_t GetHighestSequenceNumberHeard () const { return m_highestSeqnoHeard; }
+  void SetLastHopCount (uint32_t lhc ) { m_lastHopCount = lhc; }
+  uint32_t GetLastHopCount () const { return m_lastHopCount; }
   void SetNumberofPaths (uint32_t np ) { m_numPaths = np; }
   uint32_t GetNumberofPaths () const { return m_numPaths; }
   void SetError (bool e) { m_error = e; }
@@ -236,8 +249,9 @@ private:
   Time m_blackListTimeout;
 
   //AOMDV
-  u_int16_t  m_advertisedHopCount;
-  u_int32_t  m_highestSeqnoHeard; 
+  uint16_t  m_advertisedHopCount;
+  uint32_t  m_highestSeqnoHeard;
+  uint32_t  m_lastHopCount;  
   int  m_numPaths;
   bool  m_error;
 };
@@ -321,6 +335,12 @@ private:
   void Purge (std::map<Ipv4Address, RoutingTableEntry> &table) const;
 };
 
+inline bool operator == (const RoutingTableEntry::Path &a, const RoutingTableEntry::Path &b)
+  {
+    return (a.m_ipv4Route == b.m_ipv4Route && a.m_hopCount == b.m_hopCount && 
+            a.m_expire == b.m_expire && a.m_lastHop == b.m_lastHop && a.m_iface == b.m_iface 
+            && a.m_ts == b.m_ts && a.m_pathError == b.m_pathError);
+  }
 }
 }
 
